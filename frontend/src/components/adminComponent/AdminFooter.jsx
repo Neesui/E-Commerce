@@ -1,11 +1,10 @@
-import React from 'react'
 
 const AdminFooter = () => {
-  return (
-    <>
-      
-    </>
-  )
-}
-
-export default AdminFooter
+    return (
+      <>
+        AdminFooter
+      </>
+    )
+  }
+  
+  export default AdminFooter
