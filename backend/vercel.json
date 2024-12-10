@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "functions": {
+    "api/categoryRoute.js": { "memory": 256 },
+    "api/orderRoute.js": { "memory": 256 },
+    "api/paymentRoute.js": { "memory": 256 },
+    "api/productRoute.js": { "memory": 256 },
+    "api/userRoute.js": { "memory": 256 }
+  }
+}
+
+

@@ -1,91 +1,77 @@
-import Category from '../models/categoryModel.js';
+const Category = require('../models/categoryModel')
 
-// Insert a new category
-export const postCategory = async (req, res) => {
-    try {
-        // Check for unique category name
-        const existingCategory = await Category.findOne({ categoryName: req.body.categoryName });
-        if (existingCategory) {
-            return res.status(400).json({ error: 'Category name must be unique' });
+exports.testFunction = (req,res)=>{
+    res.send('This is from the category controller')   
+}
+
+
+// to inser the category data
+
+exports.postCategory = async(req, res)=>{
+    let category = new Category({
+        // database name           
+        category_name :req.body.category_name // to take input from user
+    })
+    // to check if category name already exist in database
+    Category.findOne({category_name:category.category_name})
+    .then(async categories =>{
+        if(categories){
+            return res.status(400).json({error:"category must be unique"})
         }
-
-        // Create a new category
-        const category = new Category({
-            categoryName: req.body.categoryName,
-            description: req.body.description,
-            imageUrl: req.body.imageUrl
-        });
-
-        const savedCategory = await category.save();
-        if (!savedCategory) {
-            return res.status(400).json({ error: 'Something went wrong while saving the category' });
+        else{
+            category = await category.save() // to insert the take data from user
+            if(!category){
+                return res.status(400).json({error: 'Something went wrong'}) // bad request status
+            }
+            res.send(category)
         }
+    })
+    .catch(err=>res.status(400).json({error:err}))
+   
+}
 
-        res.status(201).json(savedCategory);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+// to retrieve all data
+exports.categoryList = async(req, res)=>{
+    const category = await Category.find()
+    if(!category){
+        return res.status(400).json({error: 'Something went wrong'})
     }
-};
+    res.send(category)
+}
 
-// Retrieve all categories
-export const categoryList = async (req, res) => {
-    try {
-        const categories = await Category.find();
-        if (!categories) {
-            return res.status(404).json({ error: 'No categories found' });
-        }
-        res.status(200).json(categories);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+// to view category details
+exports.categoryDetials = async(req, res)=>{
+    const category = await Category.findById(req.params.id)
+    if(!category){
+        return res.status(400).json({error: 'Something went wrong'})
     }
-};
+    res.send(category)
+}
 
-// View category details
-export const categoryDetails = async (req, res) => {
-    try {
-        const category = await Category.findById(req.params.id);
-        if (!category) {
-            return res.status(404).json({ error: 'Category not found' });
-        }
-        res.status(200).json(category);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
+// to update category
+
+exports.updateCategory = async(req,res)=>{
+    const category = await Category.findByIdAndUpdate(req.params.id, {
+        category_name:req.body.category_name
+    },{new:true})
+    if(!category){
+        return res.status(400).json({error: 'Something went wrong'})
     }
-};
+    res.send(category)
+}
 
-// Update category
-export const updateCategory = async (req, res) => {
-    try {
-        const updatedCategory = await Category.findByIdAndUpdate(
-            req.params.id,
-            {
-                categoryName: req.body.categoryName,
-                description: req.body.description,
-                imageUrl: req.body.imageUrl
-            },
-            { new: true, runValidators: true } // Return the updated document and validate fields
-        );
-
-        if (!updatedCategory) {
-            return res.status(404).json({ error: 'Category not found' });
+// delete category
+exports.deleteCategory =(req, res)=>{
+    Category.findByIdAndDelete(req.params.id)
+    .then(category=>{
+        if(!category){
+            return res.status(403).json({error:'category with that id not found'})
         }
-
-        res.status(200).json(updatedCategory);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
-
-// Delete category
-export const deleteCategory = async (req, res) => {
-    try {
-        const deletedCategory = await Category.findByIdAndDelete(req.params.id);
-        if (!deletedCategory) {
-            return res.status(404).json({ error: 'Category with that ID not found' });
+        else{
+            return res.status(200).json({message:"category deleted"})
         }
-
-        res.status(200).json({ message: 'Category deleted successfully' });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-};
+    })
+    .catch(err=>{
+        return res.status(400).json({error:err})
+    })
+}
