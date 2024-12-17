@@ -1,44 +1,35 @@
-const multer = require('multer')
-const fs = require('fs')
-const path = require('path')
+const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
+// Configure multer storage
 const storage = multer.diskStorage({
-    destination:(req,file,cb)=>{
-        let fileDestination = 'public/uploads/'
-        // check if directory exist
-        if(!fs.existsSync(fileDestination)){
-            fs.mkdirSync(fileDestination, {recursive:true})
-            cb(null,fileDestination)
+    destination: (req, file, cb) => {
+        const fileDestination = 'public/uploads/';
+        if (!fs.existsSync(fileDestination)) {
+            fs.mkdirSync(fileDestination, { recursive: true });
         }
-        else{
-            cb(null,fileDestination)
-        }
+        cb(null, fileDestination);
     },
-    filename:(req,file,cb)=>{
-        let filename=path.basename(file.originalname, path.extname(file.originalname))
-        //path.basename('images/foo/abc.jpg', .jpg)
-        //abc
-        let ext = path.extname(file.originalname)
-        //.jpg
-        cb(null, filename+'_'+Date.now()+ext)
+    filename: (req, file, cb) => {
+        const filename = path.basename(file.originalname, path.extname(file.originalname));
+        const ext = path.extname(file.originalname);
+        cb(null, `${filename}_${Date.now()}${ext}`);
     }
-})
+});
 
-let imageFilter = (req, file,cb)=>{
-    if(!file.originalname.match(/\.(jpg|png|jpeg|svg|jfif|gif|JPG|PNG|JPEG|SVG|JFIF|GIF)$/)){
-        return cb(new Error('You can upload image fileonly'), false)
+// Image file filter
+const imageFilter = (req, file, cb) => {
+    if (!file.originalname.match(/\.(jpg|jpeg|png|gif|jfif)$/i)) {
+        return cb(new Error('You can upload image files only'), false);
     }
-    else{
-        cb(null,true)
-    }
-}
+    cb(null, true);
+};
 
 const upload = multer({
-    storage:storage,
-    fileFilter:imageFilter,
-    limits:{
-        fileSize:3000000 // #mb
-    }
-})
+    storage,
+    fileFilter: imageFilter,
+    limits: { fileSize: 3000000 } // 3MB limit
+});
 
-module.exports=upload
+module.exports = upload;
